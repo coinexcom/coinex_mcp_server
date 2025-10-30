@@ -1,0 +1,16 @@
+# IDE
+/.idea
+
+# local config
+.env
+
+# Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS
+.DS_Store
+
+# agent
+CLAUDE.md
