@@ -5,16 +5,11 @@ This module tests the actual MCP tool functions defined in main.py,
 accessing them through the .fn attribute to bypass the FastMCP decorator.
 """
 import pytest
-import sys
-import os
 from unittest.mock import AsyncMock, patch
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 # Import main module and its tools
-import main
-from coinex_client import CoinExClient
+from coinex_mcp_server import main
+from coinex_mcp_server.coinex_client import CoinExClient
 
 
 class TestPublicTools:
@@ -170,7 +165,7 @@ class TestAuthTools:
     """Test authentication-required MCP tools"""
 
     @pytest.mark.asyncio
-    @patch('main.get_secret_client')
+    @patch('coinex_mcp_server.main.get_secret_client')
     async def test_get_account_balance(self, mock_get_client):
         """Test get_account_balance tool"""
         mock_client = AsyncMock(spec=CoinExClient)
@@ -190,7 +185,7 @@ class TestAuthTools:
         assert result["code"] == 0
 
     @pytest.mark.asyncio
-    @patch('main.get_secret_client')
+    @patch('coinex_mcp_server.main.get_secret_client')
     async def test_place_order(self, mock_get_client):
         """Test place_order tool"""
         mock_client = AsyncMock(spec=CoinExClient)
@@ -215,7 +210,7 @@ class TestAuthTools:
         assert result["code"] == 0
 
     @pytest.mark.asyncio
-    @patch('main.get_secret_client')
+    @patch('coinex_mcp_server.main.get_secret_client')
     async def test_get_order_history(self, mock_get_client):
         """Test get_order_history tool"""
         mock_client = AsyncMock(spec=CoinExClient)
@@ -256,7 +251,7 @@ class TestErrorHandling:
         assert result["message"] == "Invalid market"
 
     @pytest.mark.asyncio
-    @patch('main.get_secret_client')
+    @patch('coinex_mcp_server.main.get_secret_client')
     async def test_auth_credential_error(self, mock_get_client):
         """Test auth tool behavior when credentials are missing"""
         mock_get_client.side_effect = ValueError("Request headers must include X-CoinEx-Access-Id")

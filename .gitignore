@@ -12,5 +12,23 @@
 # macOS
 .DS_Store
 
-# agent
+# deploy
+dist/
+build/
+**/*.egg-info/
+*.egg
+
+# migration docs (internal notes, not for git)
+docs/migration/
+
+# AI assistants & agents
+.cursorrules
+.cursor/
+.windsurfrules
+.clinerules
+.aider*
+.continue/
+.github/copilot-*
+.roo/
+.supermaven/
 CLAUDE.md

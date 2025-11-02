@@ -58,12 +58,12 @@ _注意，如果是 SSE 或者 Streamable HTTP 模式，环境变量中的凭证
 ### 启动服务器
 
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
-### 启动参数与示例（新增）
+### 启动参数与示例
 
-`main.py` 现已支持命令行参数，便于切换传输协议与网络配置：
+服务器支持命令行参数，便于切换传输协议与网络配置：
 
 - `--transport`：传输协议，可选 `stdio`（默认）| `http`（等价于 `streamable-http`）| `streamable-http` | `sse`
 - `--host`：HTTP 服务绑定地址（仅 http/streamable-http 模式有效）
@@ -76,17 +76,17 @@ python main.py
 
 #### 查看帮助：
 ```bash
-python main.py --help
+python -m coinex_mcp_server.main --help
 ```
 #### 缺省启动 stdio 服务
 （通常不需要手工启动，在 agent 中配置启动文件和参数即可）
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
 #### 启动 HTTP 服务
 ```bash
-python main.py --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
 ```
 
 说明：若使用 HTTP GET 方法直接访问 `/mcp` 端点，可能返回 `406 Not Acceptable`，这是正常的——Streamable HTTP 端点需要符合协议的交互流程；该返回码也可证明 HTTP 服务已启动并在响应。

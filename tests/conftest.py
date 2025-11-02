@@ -5,12 +5,8 @@ import os
 import pytest
 import asyncio
 from typing import Generator
-import sys
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
-from coinex_client import CoinExClient
+from coinex_mcp_server.coinex_client import CoinExClient
 
 
 @pytest.fixture(scope="session")

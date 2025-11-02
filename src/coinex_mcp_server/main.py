@@ -18,7 +18,7 @@ from pydantic import Field, validate_call
 from fastmcp import FastMCP
 from fastmcp.server.auth import StaticTokenVerifier
 from fastmcp.server.dependencies import get_http_headers
-from coinex_client import CoinExClient, validate_environment
+from .coinex_client import CoinExClient, validate_environment
 import os
 import argparse
 

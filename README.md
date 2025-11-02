@@ -59,12 +59,12 @@ _Note: In SSE or Streamable HTTP mode, environment variable credentials will be 
 ### Start the Server
 
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
-### Command Line Arguments & Examples (New)
+### Command Line Arguments & Examples
 
-`main.py` now supports command line arguments for switching transport protocols and network configuration:
+The server supports command line arguments for switching transport protocols and network configuration:
 
 - `--transport`: Transport protocol, options: `stdio` (default) | `http` (equivalent to `streamable-http`) | `streamable-http` | `sse`
 - `--host`: HTTP service bind address (only valid for http/streamable-http mode)
@@ -77,18 +77,18 @@ python main.py
 
 #### View Help:
 ```bash
-python main.py --help
+python -m coinex_mcp_server.main --help
 ```
 
 #### Default stdio Service Start
 (Usually no manual start needed, configure startup file and parameters in agent)
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
 #### Start HTTP Service
 ```bash
-python main.py --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
 ```
 
 Note: If using HTTP GET method to directly access the `/mcp` endpoint, it may return `406 Not Acceptable`, which is normal—Streamable HTTP endpoints require protocol-compliant interaction flows; this return code also proves the HTTP service has started and is responding.
