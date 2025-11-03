@@ -54,7 +54,116 @@ _Note: In SSE or Streamable HTTP mode, environment variable credentials will be 
 - Set appropriate permissions for your API Key, only enabling necessary functions
 - Do not commit the `.env` file to version control systems
 
-## Usage
+## MCP Client Configuration
+
+As published to PyPI, you can configure MCP clients to use this server without pre-installing the package.
+
+### Using uvx (Recommended)
+
+[uvx](https://docs.astral.sh/uv/guides/tools/) automatically manages package installation and environment isolation, similar to npx for Node.js.
+
+#### Claude Desktop Configuration
+
+Edit your Claude Desktop configuration file:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "uvx",
+      "args": ["coinex-mcp-server"],
+      "env": {
+        "COINEX_ACCESS_ID": "your_access_id_here",
+        "COINEX_SECRET_KEY": "your_secret_key_here"
+      }
+    }
+  }
+}
+```
+
+#### CherryStudio Configuration
+
+In CherryStudio's MCP settings, add:
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "uvx",
+      "args": ["coinex-mcp-server"],
+      "env": {
+        "COINEX_ACCESS_ID": "your_access_id_here",
+        "COINEX_SECRET_KEY": "your_secret_key_here"
+      }
+    }
+  }
+}
+```
+
+#### HTTP Mode with uvx
+
+To run the server in HTTP mode:
+
+```json
+{
+  "mcpServers": {
+    "coinex-http": {
+      "command": "uvx",
+      "args": [
+        "coinex-mcp-server",
+        "--transport",
+        "http",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--path",
+        "/mcp"
+      ]
+    }
+  }
+}
+```
+
+### Using Pre-installed Package
+
+If you prefer to install the package first:
+
+```bash
+# Install the package
+pip install coinex-mcp-server
+
+# Or with uv
+uv pip install coinex-mcp-server
+```
+
+Then configure your MCP client:
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "python",
+      "args": [
+        "-m",
+        "coinex_mcp_server.main"
+      ],
+      "env": {
+        "COINEX_ACCESS_ID": "your_access_id_here",
+        "COINEX_SECRET_KEY": "your_secret_key_here"
+      }
+    }
+  }
+}
+```
+
+## From Source Usage
+
+### clone the project
+`git clone https://github.com/coinexcom/coinex_mcp_server`
 
 ### Start the Server
 
