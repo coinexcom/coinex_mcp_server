@@ -14,54 +14,43 @@ CoinEx MCP（Model Context Protocol）服务器，用于让 ai agent 拥有访�
 - 📋 查询订单历史（需认证）
 - 📜 合约专属：资金费率、溢价/基差历史、仓位阶梯、强平历史等等
 
-## 安装与配置
+## 快速开始
 
-### 1. 安装依赖
+根据您的需求选择以下安装方式之一：
 
-```bash
-uv sync
-```
+1. **在线 HTTP 服务**（推荐）- 无需本地安装，仅支持公开市场数据查询
+2. **本地安装（uvx/pip）** - 支持认证操作（余额查询、交易下单）
+3. **源码安装** - 用于开发或自定义
 
-### 2. 配置 API 凭证
-在缺省的 stdio 模式中，API 凭证是通过环境变量获取的，但通常 MCP Server 并不会直接从命令行启动。 可以通过以下两种方式配置：
+### 获取 CoinEx API 凭证（可选）
 
-#### 2.1 基于 MCP 客户端配置
-比如 Claude Desktop、CherryStudio 或者 mcp inspector 等。
-
-#### 2.2 基于本地文件配置
-1. 复制环境变量模板文件：
-```bash
-cp .env.example .env
-```
-
-2. 编辑 `.env` 文件，填入您的 CoinEx API 凭证：
-```env
-COINEX_ACCESS_ID=your_access_id_here
-COINEX_SECRET_KEY=your_secret_key_here
-```
-_注意，如果是 SSE 或者 Streamable HTTP 模式，环境变量中的凭证将被忽略。
-
-### 3. 获取 CoinEx API 凭证
+API 凭证仅在需要认证操作（账户余额、交易下单）时必需。如果只需要查询市场数据，可以跳过此步骤。
 
 1. 登录 [CoinEx 官网](https://www.coinex.com/)
 2. 进入 **用户中心** -> **API 管理**
 3. 创建新的 API Key
-4. 复制 Access ID 和 Secret Key 到 `.env` 文件中
+4. 复制 Access ID 和 Secret Key 备用
 
 ⚠️ **安全提示**：
 - 请妥善保管您的 API 凭证，不要泄露给他人
 - 建议为 API Key 设置合适的权限，只开启必要的功能
-- 不要将 `.env` 文件提交到版本控制系统
+- 不要将凭证提交到版本控制系统
 
-## MCP 客户端配置
+---
 
-项目已发布到 PyPI，你可以在 MCP 客户端中配置使用此服务器，无需预先安装包。
+## 安装方式 1：在线 HTTP 服务（推荐）
 
-### 使用 uvx（推荐）
+**无需本地安装。** 使用 CoinEx 托管的 MCP 服务：`https://mcp.coinex.com/mcp`
 
-[uvx](https://docs.astral.sh/uv/guides/tools/) 会自动管理包的安装和环境隔离，类似于 Node.js 的 npx。
+⚠️ **注意**：在线服务仅提供公开市场数据查询。如需认证操作（余额、交易），请使用方式 2 或 3。
 
-#### Claude Desktop 配置
+### Claude Code
+
+```bash
+claude mcp add --transport http coinex-mcp-server https://mcp.coinex.com/mcp
+```
+
+### Claude Desktop
 
 编辑 Claude Desktop 配置文件：
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -72,20 +61,32 @@ _注意，如果是 SSE 或者 Streamable HTTP 模式，环境变量中的凭证
 {
   "mcpServers": {
     "coinex": {
-      "command": "uvx",
-      "args": ["coinex-mcp-server"],
-      "env": {
-        "COINEX_ACCESS_ID": "你的_access_id",
-        "COINEX_SECRET_KEY": "你的_secret_key"
-      }
+      "command": "http",
+      "args": ["https://mcp.coinex.com/mcp"]
     }
   }
 }
 ```
 
-#### CherryStudio 配置
+### CherryStudio
 
-在 CherryStudio 的 MCP 设置中添加：
+在 CherryStudio 的 MCP GUI 设置中添加：
+
+<img src="images/CherryStudio_HTTP.png"  alt="CherryStudio CoinEx MCP 配置"/>
+
+---
+
+## 安装方式 2：本地安装（uvx/pip）
+
+在本地安装包以支持使用您的 API 凭证进行认证操作。
+
+### 选项 A：使用 uvx（推荐）
+
+无需预先安装，包会自动下载并运行。[uvx](https://docs.astral.sh/uv/guides/tools/) 类似于 Node.js 的 npx。
+
+#### Claude Desktop
+
+编辑 Claude Desktop 配置文件：
 
 ```json
 {
@@ -102,54 +103,49 @@ _注意，如果是 SSE 或者 Streamable HTTP 模式，环境变量中的凭证
 }
 ```
 
-#### 使用 uvx 启动 HTTP 模式
-
-如需以 HTTP 模式运行服务器：
-
-```json
-{
-  "mcpServers": {
-    "coinex-http": {
-      "command": "uvx",
-      "args": [
-        "coinex-mcp-server",
-        "--transport",
-        "http",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        "8000",
-        "--path",
-        "/mcp"
-      ]
-    }
-  }
-}
-```
-
-### 使用预安装的包
-
-如果你希望先安装包：
+#### Claude Code
 
 ```bash
-# 安装包
+# 添加服务器
+claude mcp add coinex-mcp-server uvx coinex-mcp-server
+
+# 然后手动编辑配置文件添加环境变量
+# 配置文件位置: ~/.config/claude/config.json
+# 在 coinex-mcp-server 配置中添加 env 字段：
+# "env": {
+#   "COINEX_ACCESS_ID": "你的_access_id",
+#   "COINEX_SECRET_KEY": "你的_secret_key"
+# }
+```
+
+#### CherryStudio
+
+在 CherryStudio 的 MCP GUI 设置中添加：
+
+<img src="images/CherryStudio_uvx.png"  alt="CherryStudio CoinEx MCP 配置"/>
+
+### 选项 B：使用 pip 安装
+
+首先安装包：
+
+```bash
+# 使用 pip
 pip install coinex-mcp-server
 
-# 或者使用 uv
+# 或使用 uv
 uv pip install coinex-mcp-server
 ```
 
 然后配置 MCP 客户端：
+
+#### Claude Desktop
 
 ```json
 {
   "mcpServers": {
     "coinex": {
       "command": "python",
-      "args": [
-        "-m",
-        "coinex_mcp_server.main"
-      ],
+      "args": ["-m", "coinex_mcp_server.main"],
       "env": {
         "COINEX_ACCESS_ID": "你的_access_id",
         "COINEX_SECRET_KEY": "你的_secret_key"
@@ -159,62 +155,155 @@ uv pip install coinex-mcp-server
 }
 ```
 
-## 本地使用方法
-
-### 克隆源码
-`git clone https://github.com/coinexcom/coinex_mcp_server`
-
-### 启动服务器
+#### Claude Code
 
 ```bash
+# 添加服务器
+claude mcp add coinex-mcp-server python -m coinex_mcp_server.main
+
+# 然后手动编辑配置文件添加环境变量
+# 配置文件位置: ~/.config/claude/config.json
+# 在 coinex-mcp-server 配置中添加 env 字段：
+# "env": {
+#   "COINEX_ACCESS_ID": "你的_access_id",
+#   "COINEX_SECRET_KEY": "你的_secret_key"
+# }
+```
+
+#### CherryStudio
+
+<img src="images/CherryStudio_python.png"  alt="CherryStudio CoinEx MCP 配置"/>
+
+---
+
+## 安装方式 3：源码安装
+
+用于开发或自定义需求。
+
+### 步骤 1：克隆仓库
+
+```bash
+git clone https://github.com/coinexcom/coinex_mcp_server
+cd coinex_mcp_server
+```
+
+### 步骤 2：安装依赖
+
+```bash
+uv sync
+```
+
+### 步骤 3：配置 API 凭证
+
+复制环境变量模板文件：
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env` 文件，填入您的 CoinEx API 凭证：
+
+```env
+COINEX_ACCESS_ID=你的_access_id
+COINEX_SECRET_KEY=你的_secret_key
+```
+
+### 步骤 4：配置 MCP 客户端
+
+#### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "python",
+      "args": ["-m", "coinex_mcp_server.main"],
+      "cwd": "/path/to/coinex_mcp_server/src"
+    }
+  }
+}
+```
+
+#### Claude Code
+
+```bash
+# 从项目目录运行
+cd /path/to/coinex_mcp_server
 python -m coinex_mcp_server.main
 ```
 
-### 启动参数与示例
+#### CherryStudio
 
-服务器支持命令行参数，便于切换传输协议与网络配置：
+<img src="images/CherryStudio_python.png"  alt="CherryStudio CoinEx MCP 配置"/>
 
-- `--transport`：传输协议，可选 `stdio`（默认）| `http`（等价于 `streamable-http`）| `streamable-http` | `sse`
-- `--host`：HTTP 服务绑定地址（仅 http/streamable-http 模式有效）
-- `--port`：HTTP 服务端口（仅 http/streamable-http 模式有效）
-- `--path`：端点路径
-  - http/streamable-http 模式：MCP 端点路径（默认 `/mcp`）
-  - sse 模式：SSE 挂载路径
-- `--enable-http-auth`：启用基于 HTTP 的认证与敏感工具（默认关闭，仅暴露查询类工具）
-- `--workers`：HTTP/SSE 模式下的工作进程数（由底层 uvicorn 管理）
 
-#### 查看帮助：
+### 步骤 5：运行服务器（可选）
+
+用于测试或以本地服务运行：
+
 ```bash
+# 默认 stdio 模式
+python -m coinex_mcp_server.main
+
+# HTTP 模式
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000
+
+# 查看所有可用选项
 python -m coinex_mcp_server.main --help
 ```
-#### 缺省启动 stdio 服务
-（通常不需要手工启动，在 agent 中配置启动文件和参数即可）
+
+---
+
+## 高级配置
+
+### 命令行参数
+
+服务器支持以下命令行参数：
+
+- `--transport`：传输协议
+  - 可选：`stdio`（默认）| `http` | `streamable-http` | `sse`
+- `--host`：HTTP 服务绑定地址（仅 HTTP/SSE 模式）
+  - 默认：`127.0.0.1`
+- `--port`：HTTP 服务端口（仅 HTTP/SSE 模式）
+  - 默认：`8000`
+- `--path`：端点路径
+  - HTTP 模式：MCP 端点路径（默认 `/mcp`）
+  - SSE 模式：SSE 挂载路径
+- `--enable-http-auth`：启用基于 HTTP 的认证与交易工具
+  - 默认：`false`（仅暴露公开市场数据工具）
+- `--workers`：工作进程数（仅 HTTP/SSE 模式）
+
+### 以 HTTP 服务方式运行
+
 ```bash
-python -m coinex_mcp_server.main
+# 基础 HTTP 服务
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000
+
+# 启用认证的 HTTP 服务
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --enable-http-auth
+
+# 多进程 HTTP 服务
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --workers 4
 ```
 
-#### 启动 HTTP 服务
-```bash
-python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
-```
+⚠️ **注意**：若使用 HTTP GET 方法直接访问 `/mcp` 端点，可能返回 `406 Not Acceptable`。这是正常的——Streamable HTTP 端点需要符合协议的交互流程。
 
-说明：若使用 HTTP GET 方法直接访问 `/mcp` 端点，可能返回 `406 Not Acceptable`，这是正常的——Streamable HTTP 端点需要符合协议的交互流程；该返回码也可证明 HTTP 服务已启动并在响应。
+### HTTP 认证模式
 
-### 通过请求头透传 CoinEx 凭证（HTTP 模式）
-服务端不保存第三方交易所凭证。对于需要认证的工具（余额/下单/撤单/订单历史），请在 HTTP 请求中携带以下请求头（大小写不敏感）：
-- `X-CoinEx-Access-Id: <你的 CoinEx Access ID>`
-- `X-CoinEx-Secret-Key: <你的 CoinEx Secret Key>`
+在 HTTP 模式下使用 `--enable-http-auth` 时，可以通过 HTTP 请求头传递 CoinEx 凭证：
 
-**注意事项**
-- **一定不要**在对外公开服务中，启用透传凭证功能，要确保整个服务端内网可控！！！（即使采用 HTTPS 传输，在反向代理等服务端节点，有可能卸载请求头，记录日志）
-- 建议通过 HTTPS 部署，防止中间人窃听（可用反向代理/Nginx/Caddy 等为 MCP 端点加 TLS）。
-- 仅当“已启用 HTTP 认证”且你调用的是需要用户凭证的工具（auth 标签）时才需要这些请求头。
-  - 启用方式：`--enable-http-auth` 或设置环境变量 `HTTP_AUTH_ENABLED=true`
-  - 默认情况下 HTTP 认证关闭，此时仅暴露查询类工具（public），这些工具不需要也不会读取上述请求头。
-- 仅对 HTTP/Streamable HTTP 模式有效；STDIO 模式从环境变量（或者.env 配置文件）读取凭证。
+**请求头：**
+- `X-CoinEx-Access-Id`：您的 CoinEx Access ID
+- `X-CoinEx-Secret-Key`：您的 CoinEx Secret Key
 
-### 日志与安全
-- 确保反向代理/APM/日志系统不会记录 `Authorization` 或 `X-CoinEx-*` 这类敏感请求头。
+**安全注意事项：**
+- **一定不要**在对外公开的服务中启用 HTTP 认证
+- 生产环境必须使用 HTTPS（使用 Nginx/Caddy 等反向代理）
+- 确保反向代理/APM/日志系统不记录敏感请求头
+- 仅在可信的内网环境中使用
+- 默认情况下，HTTP 模式仅暴露公开市场数据工具（无需认证）
+
+---
 
 ## 工具一览（Tools）
 

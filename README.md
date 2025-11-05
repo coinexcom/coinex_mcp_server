@@ -14,55 +14,43 @@ A CoinEx MCP (Model Context Protocol) server that enables AI agents to interact 
 - 📋 Query order history (authentication required)
 - 📜 Futures-specific: funding rates, premium/basis history, margin tiers, liquidation history, etc.
 
-## Installation & Configuration
+## Quick Start
 
-### 1. Install Dependencies
+Choose one of the following installation methods based on your needs:
 
-```bash
-uv sync
-```
+1. **Online HTTP Service** (Recommended) - No local installation required, public market data only
+2. **Local Installation via uvx/pip** - Supports authenticated operations (balance queries, trading)
+3. **From Source** - For development or customization
 
-### 2. Configure API Credentials
+### Obtaining CoinEx API Credentials (Optional)
 
-In the default stdio mode, API credentials are obtained through environment variables, but typically MCP servers are not launched directly from the command line. You can configure credentials in two ways:
-
-#### 2.1 MCP Client Configuration
-Through MCP clients like Claude Desktop, CherryStudio, or mcp inspector.
-
-#### 2.2 Local File Configuration
-1. Copy the environment variable template file:
-```bash
-cp .env.example .env
-```
-
-2. Edit the `.env` file and fill in your CoinEx API credentials:
-```env
-COINEX_ACCESS_ID=your_access_id_here
-COINEX_SECRET_KEY=your_secret_key_here
-```
-_Note: In SSE or Streamable HTTP mode, environment variable credentials will be ignored._
-
-### 3. Obtain CoinEx API Credentials
+API credentials are only required for authenticated operations (account balance, trading). For market data queries only, you can skip this step.
 
 1. Log in to [CoinEx Official Website](https://www.coinex.com/)
 2. Go to **User Center** -> **API Management**
 3. Create a new API Key
-4. Copy the Access ID and Secret Key to your `.env` file
+4. Copy the Access ID and Secret Key for later use
 
 ⚠️ **Security Notice**:
 - Keep your API credentials safe and do not share them with others
 - Set appropriate permissions for your API Key, only enabling necessary functions
-- Do not commit the `.env` file to version control systems
+- Do not commit credentials to version control systems
 
-## MCP Client Configuration
+---
 
-As published to PyPI, you can configure MCP clients to use this server without pre-installing the package.
+## Installation Method 1: Online HTTP Service (Recommended)
 
-### Using uvx (Recommended)
+**No local installation required.** Use CoinEx's hosted MCP service at `https://mcp.coinex.com/mcp`.
 
-[uvx](https://docs.astral.sh/uv/guides/tools/) automatically manages package installation and environment isolation, similar to npx for Node.js.
+⚠️ **Note**: The online service only provides public market data queries. For authenticated operations (balance, trading), use Method 2 or 3.
 
-#### Claude Desktop Configuration
+### Claude Code
+
+```bash
+claude mcp add --transport http coinex-mcp-server https://mcp.coinex.com/mcp
+```
+
+### Claude Desktop
 
 Edit your Claude Desktop configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -73,20 +61,32 @@ Edit your Claude Desktop configuration file:
 {
   "mcpServers": {
     "coinex": {
-      "command": "uvx",
-      "args": ["coinex-mcp-server"],
-      "env": {
-        "COINEX_ACCESS_ID": "your_access_id_here",
-        "COINEX_SECRET_KEY": "your_secret_key_here"
-      }
+      "command": "http",
+      "args": ["https://mcp.coinex.com/mcp"]
     }
   }
 }
 ```
 
-#### CherryStudio Configuration
+### CherryStudio
 
-In CherryStudio's MCP settings, add:
+In CherryStudio's MCP settings, GUI configuration:
+
+<img src="images/CherryStudio_HTTP_en.png"  alt="CherryStudio CoinEx MCP Configuration"/>
+
+---
+
+## Installation Method 2: Local Installation via uvx/pip
+
+Install the package locally to support authenticated operations with your API credentials.
+
+### Option A: Using uvx (Recommended)
+
+No pre-installation needed. The package will be automatically downloaded and run.
+
+#### Claude Desktop
+
+Edit your Claude Desktop configuration file:
 
 ```json
 {
@@ -103,54 +103,49 @@ In CherryStudio's MCP settings, add:
 }
 ```
 
-#### HTTP Mode with uvx
-
-To run the server in HTTP mode:
-
-```json
-{
-  "mcpServers": {
-    "coinex-http": {
-      "command": "uvx",
-      "args": [
-        "coinex-mcp-server",
-        "--transport",
-        "http",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        "8000",
-        "--path",
-        "/mcp"
-      ]
-    }
-  }
-}
-```
-
-### Using Pre-installed Package
-
-If you prefer to install the package first:
+#### Claude Code
 
 ```bash
-# Install the package
+# Add the server
+claude mcp add coinex-mcp-server uvx coinex-mcp-server
+
+# Then manually edit the config file to add environment variables
+# Config file location: ~/.config/claude/config.json
+# Add env field to the coinex-mcp-server configuration:
+# "env": {
+#   "COINEX_ACCESS_ID": "your_access_id",
+#   "COINEX_SECRET_KEY": "your_secret_key"
+# }
+```
+
+#### CherryStudio
+
+In CherryStudio's MCP settings, add:
+
+<img src="images/CherryStudio_uvx_en.png"  alt="CherryStudio CoinEx MCP Configuration"/>
+
+### Option B: Using pip install
+
+First, install the package:
+
+```bash
+# Using pip
 pip install coinex-mcp-server
 
-# Or with uv
+# Or using uv
 uv pip install coinex-mcp-server
 ```
 
 Then configure your MCP client:
+
+#### Claude Desktop
 
 ```json
 {
   "mcpServers": {
     "coinex": {
       "command": "python",
-      "args": [
-        "-m",
-        "coinex_mcp_server.main"
-      ],
+      "args": ["-m", "coinex_mcp_server.main"],
       "env": {
         "COINEX_ACCESS_ID": "your_access_id_here",
         "COINEX_SECRET_KEY": "your_secret_key_here"
@@ -160,63 +155,154 @@ Then configure your MCP client:
 }
 ```
 
-## From Source Usage
-
-### clone the project
-`git clone https://github.com/coinexcom/coinex_mcp_server`
-
-### Start the Server
+#### Claude Code
 
 ```bash
+# Add the server
+claude mcp add coinex-mcp-server python -m coinex_mcp_server.main
+
+# Then manually edit the config file to add environment variables
+# Config file location: ~/.config/claude/config.json
+# Add env field to the coinex-mcp-server configuration:
+# "env": {
+#   "COINEX_ACCESS_ID": "your_access_id",
+#   "COINEX_SECRET_KEY": "your_secret_key"
+# }
+```
+
+#### CherryStudio
+
+<img src="images/CherryStudio_python_en.png"  alt="CherryStudio CoinEx MCP Configuration"/>
+
+---
+
+## Installation Method 3: From Source
+
+For development or customization purposes.
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/coinexcom/coinex_mcp_server
+cd coinex_mcp_server
+```
+
+### Step 2: Install Dependencies
+
+```bash
+uv sync
+```
+
+### Step 3: Configure API Credentials
+
+Copy the environment variable template file:
+
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file and fill in your CoinEx API credentials:
+
+```env
+COINEX_ACCESS_ID=your_access_id_here
+COINEX_SECRET_KEY=your_secret_key_here
+```
+
+### Step 4: Configure MCP Client
+
+#### Claude Desktop
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "python",
+      "args": ["-m", "coinex_mcp_server.main"],
+      "cwd": "/path/to/coinex_mcp_server/src"
+    }
+  }
+}
+```
+
+#### Claude Code
+
+```bash
+# Run from the project directory
+cd /path/to/coinex_mcp_server
 python -m coinex_mcp_server.main
 ```
 
-### Command Line Arguments & Examples
+#### CherryStudio
 
-The server supports command line arguments for switching transport protocols and network configuration:
+<img src="images/CherryStudio_python_en.png"  alt="CherryStudio CoinEx MCP Configuration"/>
 
-- `--transport`: Transport protocol, options: `stdio` (default) | `http` (equivalent to `streamable-http`) | `streamable-http` | `sse`
-- `--host`: HTTP service bind address (only valid for http/streamable-http mode)
-- `--port`: HTTP service port (only valid for http/streamable-http mode)
-- `--path`: Endpoint path
-  - http/streamable-http mode: MCP endpoint path (default `/mcp`)
-  - sse mode: SSE mount path
-- `--enable-http-auth`: Enable HTTP-based authentication and sensitive tools (disabled by default, only exposes query tools)
-- `--workers`: Number of worker processes for HTTP/SSE mode (managed by underlying uvicorn)
+### Step 5: Run the Server (Optional)
 
-#### View Help:
+For testing or running in HTTP mode:
+
 ```bash
+# Default stdio mode
+python -m coinex_mcp_server.main
+
+# HTTP mode
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000
+
+# View all available options
 python -m coinex_mcp_server.main --help
 ```
 
-#### Default stdio Service Start
-(Usually no manual start needed, configure startup file and parameters in agent)
+---
+
+## Advanced Configuration
+
+### Command Line Arguments
+
+The server supports the following command line arguments:
+
+- `--transport`: Transport protocol
+  - Options: `stdio` (default) | `http` | `streamable-http` | `sse`
+- `--host`: HTTP service bind address (HTTP/SSE mode only)
+  - Default: `127.0.0.1`
+- `--port`: HTTP service port (HTTP/SSE mode only)
+  - Default: `8000`
+- `--path`: Endpoint path
+  - HTTP mode: MCP endpoint path (default `/mcp`)
+  - SSE mode: SSE mount path
+- `--enable-http-auth`: Enable HTTP-based authentication for trading tools
+  - Default: `false` (only public market data tools exposed)
+- `--workers`: Number of worker processes (HTTP/SSE mode only)
+
+### Running as HTTP Service
+
 ```bash
-python -m coinex_mcp_server.main
+# Basic HTTP service
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000
+
+# HTTP service with authentication enabled
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --enable-http-auth
+
+# HTTP service with multiple workers
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --workers 4
 ```
 
-#### Start HTTP Service
-```bash
-python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
-```
+⚠️ **Note**: If you access the `/mcp` endpoint directly via HTTP GET, it may return `406 Not Acceptable`. This is normal—Streamable HTTP endpoints require protocol-compliant interaction flows.
 
-Note: If using HTTP GET method to directly access the `/mcp` endpoint, it may return `406 Not Acceptable`, which is normal—Streamable HTTP endpoints require protocol-compliant interaction flows; this return code also proves the HTTP service has started and is responding.
+### HTTP Authentication Mode
 
-### Pass CoinEx Credentials via HTTP Headers (HTTP Mode)
-The server does not store third-party exchange credentials. For tools requiring authentication (balance/place order/cancel order/order history), include the following headers in HTTP requests (case-insensitive):
-- `X-CoinEx-Access-Id: <your CoinEx Access ID>`
-- `X-CoinEx-Secret-Key: <your CoinEx Secret Key>`
+When running in HTTP mode with `--enable-http-auth`, you can pass CoinEx credentials via HTTP headers:
 
-**Important Notes**
-- **Never** enable credential pass-through functionality in publicly exposed services; ensure the entire server backend is controlled within an internal network! (Even with HTTPS transport, reverse proxies and other server nodes may offload request headers and log them)
-- Deploy via HTTPS to prevent man-in-the-middle eavesdropping (use reverse proxy/Nginx/Caddy to add TLS to MCP endpoints).
-- These headers are only needed when "HTTP authentication is enabled" and you're calling tools that require user credentials (auth tag).
-  - Enable with: `--enable-http-auth` or set environment variable `HTTP_AUTH_ENABLED=true`
-  - By default, HTTP authentication is disabled, exposing only query tools (public), which don't need or read the above headers.
-- Only valid for HTTP/Streamable HTTP mode; STDIO mode reads credentials from environment variables (or .env config file).
+**Request Headers:**
+- `X-CoinEx-Access-Id`: Your CoinEx Access ID
+- `X-CoinEx-Secret-Key`: Your CoinEx Secret Key
 
-### Logging & Security
-- Ensure reverse proxies/APM/logging systems don't record sensitive headers like `Authorization` or `X-CoinEx-*`.
+**Security Considerations:**
+- **Never** enable HTTP authentication on publicly exposed services
+- Always use HTTPS in production (use reverse proxy like Nginx/Caddy)
+- Ensure reverse proxies/APM/logging systems don't record sensitive headers
+- Only use in trusted internal network environments
+- By default, HTTP mode only exposes public market data tools (no authentication required)
+
+---
 
 ## Tools Overview
 
