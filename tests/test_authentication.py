@@ -5,7 +5,7 @@ import pytest
 import os
 from typing import Dict, Any
 from dotenv import load_dotenv
-from coinex_client import CoinExClient
+from coinex_mcp_server.coinex_client import CoinExClient
 
 # Load environment variables from .env file
 load_dotenv()

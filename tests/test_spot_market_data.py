@@ -3,7 +3,7 @@ Test cases for CoinEx spot market data APIs
 """
 import pytest
 from typing import Dict, Any, List
-from coinex_client import CoinExClient
+from coinex_mcp_server.coinex_client import CoinExClient
 
 
 class TestSpotMarketData:

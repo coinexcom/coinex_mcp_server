@@ -18,7 +18,7 @@ from pydantic import Field, validate_call
 from fastmcp import FastMCP
 from fastmcp.server.auth import StaticTokenVerifier
 from fastmcp.server.dependencies import get_http_headers
-from coinex_client import CoinExClient, validate_environment
+from .coinex_client import CoinExClient, validate_environment
 import os
 import argparse
 
@@ -532,7 +532,8 @@ async def get_order_history(
     return api_result
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the CoinEx MCP server CLI."""
     parser = argparse.ArgumentParser(description="CoinEx FastMCP server startup parameters")
     parser.add_argument(
         "--transport",
@@ -574,6 +575,9 @@ if __name__ == "__main__":
     # Calculate HTTP auth switch: default off; only enable when explicitly turned on via command line or environment variable
     env_http_auth_enabled = os.getenv("HTTP_AUTH_ENABLED", "false").lower() in ("1", "true", "yes", "on")
     http_auth_enabled = args.enable_http_auth or env_http_auth_enabled
+
+    # Declare global variables to modify module-level variables
+    global coinex_client, is_http_like
 
     # Apply switch under HTTP/SSE transport
     is_http_like = transport in ("streamable-http", "sse")
@@ -635,3 +639,7 @@ if __name__ == "__main__":
             # Only pass when configured, avoid affecting stdio
             **({"uvicorn_config": uvicorn_config} if uvicorn_config is not None else {})
         )
+
+
+if __name__ == "__main__":
+    main()

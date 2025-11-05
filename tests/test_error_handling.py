@@ -3,7 +3,7 @@ Test cases for error handling and edge cases
 """
 import pytest
 from typing import Dict, Any
-from coinex_client import CoinExClient
+from coinex_mcp_server.coinex_client import CoinExClient
 
 
 class TestErrorHandling:

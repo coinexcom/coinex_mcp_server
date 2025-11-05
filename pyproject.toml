@@ -1,15 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project]
 name = "coinex-mcp-server"
-version = "0.1.0"
-description = "CoinEx cryptocurrency exchange MCP server"
+version = "0.1.0a6"
+description = "A CoinEx MCP (Model Context Protocol) server that enables AI agents to interact with the CoinEx cryptocurrency exchange"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    {name = "CoinEx MCP Contributors"}
+]
+maintainers = [
+    {name = "CoinEx MCP Contributors"}
+]
+keywords = [
+    "coinex",
+    "mcp",
+    "model-context-protocol",
+    "cryptocurrency",
+    "exchange",
+    "trading",
+    "api",
+    "fastmcp",
+    "ai-agent"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Framework :: AsyncIO",
+    "Environment :: Console",
+]
 dependencies = [
     "httpx>=0.28.1",
     "fastmcp==2.12.4",
     "python-dotenv>=1.1.1",
     "pydantic>=2.7.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/coinexcom/coinex_mcp_server"
+Repository = "https://github.com/coinexcom/coinex_mcp_server"
+Documentation = "https://github.com/coinexcom/coinex_mcp_server#readme"
+"Bug Tracker" = "https://github.com/coinexcom/coinex_mcp_server/issues"
+
+[project.scripts]
+coinex-mcp-server = "coinex_mcp_server.main:main"
 
 [tool.uv]
 dev-dependencies = [

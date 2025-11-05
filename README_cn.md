@@ -53,17 +53,126 @@ _注意，如果是 SSE 或者 Streamable HTTP 模式，环境变量中的凭证
 - 建议为 API Key 设置合适的权限，只开启必要的功能
 - 不要将 `.env` 文件提交到版本控制系统
 
-## 使用方法
+## MCP 客户端配置
+
+项目已发布到 PyPI，你可以在 MCP 客户端中配置使用此服务器，无需预先安装包。
+
+### 使用 uvx（推荐）
+
+[uvx](https://docs.astral.sh/uv/guides/tools/) 会自动管理包的安装和环境隔离，类似于 Node.js 的 npx。
+
+#### Claude Desktop 配置
+
+编辑 Claude Desktop 配置文件：
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "uvx",
+      "args": ["coinex-mcp-server"],
+      "env": {
+        "COINEX_ACCESS_ID": "你的_access_id",
+        "COINEX_SECRET_KEY": "你的_secret_key"
+      }
+    }
+  }
+}
+```
+
+#### CherryStudio 配置
+
+在 CherryStudio 的 MCP 设置中添加：
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "uvx",
+      "args": ["coinex-mcp-server"],
+      "env": {
+        "COINEX_ACCESS_ID": "你的_access_id",
+        "COINEX_SECRET_KEY": "你的_secret_key"
+      }
+    }
+  }
+}
+```
+
+#### 使用 uvx 启动 HTTP 模式
+
+如需以 HTTP 模式运行服务器：
+
+```json
+{
+  "mcpServers": {
+    "coinex-http": {
+      "command": "uvx",
+      "args": [
+        "coinex-mcp-server",
+        "--transport",
+        "http",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--path",
+        "/mcp"
+      ]
+    }
+  }
+}
+```
+
+### 使用预安装的包
+
+如果你希望先安装包：
+
+```bash
+# 安装包
+pip install coinex-mcp-server
+
+# 或者使用 uv
+uv pip install coinex-mcp-server
+```
+
+然后配置 MCP 客户端：
+
+```json
+{
+  "mcpServers": {
+    "coinex": {
+      "command": "python",
+      "args": [
+        "-m",
+        "coinex_mcp_server.main"
+      ],
+      "env": {
+        "COINEX_ACCESS_ID": "你的_access_id",
+        "COINEX_SECRET_KEY": "你的_secret_key"
+      }
+    }
+  }
+}
+```
+
+## 本地使用方法
+
+### 克隆源码
+`git clone https://github.com/coinexcom/coinex_mcp_server`
 
 ### 启动服务器
 
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
-### 启动参数与示例（新增）
+### 启动参数与示例
 
-`main.py` 现已支持命令行参数，便于切换传输协议与网络配置：
+服务器支持命令行参数，便于切换传输协议与网络配置：
 
 - `--transport`：传输协议，可选 `stdio`（默认）| `http`（等价于 `streamable-http`）| `streamable-http` | `sse`
 - `--host`：HTTP 服务绑定地址（仅 http/streamable-http 模式有效）
@@ -76,17 +185,17 @@ python main.py
 
 #### 查看帮助：
 ```bash
-python main.py --help
+python -m coinex_mcp_server.main --help
 ```
 #### 缺省启动 stdio 服务
 （通常不需要手工启动，在 agent 中配置启动文件和参数即可）
 ```bash
-python main.py
+python -m coinex_mcp_server.main
 ```
 
 #### 启动 HTTP 服务
 ```bash
-python main.py --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
+python -m coinex_mcp_server.main --transport http --host 0.0.0.0 --port 8000 --path /mcp --workers 2
 ```
 
 说明：若使用 HTTP GET 方法直接访问 `/mcp` 端点，可能返回 `406 Not Acceptable`，这是正常的——Streamable HTTP 端点需要符合协议的交互流程；该返回码也可证明 HTTP 服务已启动并在响应。
