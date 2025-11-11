@@ -272,7 +272,7 @@ wheels = [
 
 [[package]]
 name = "coinex-mcp-server"
-version = "0.1.0a6"
+version = "0.1.0a8"
 source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
